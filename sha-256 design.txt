@@ -49,10 +49,12 @@ inputs:
 	- input[0...15]	// 512 bits input
 	- start
 	- clk
+	- rst_n
 
 outputs: 
 	- w[i]		// 32 bits output
-	- rdy
+	- w_valid
+	- done		// ready for next start
 
 compression_loop: 
 
