@@ -31,6 +31,11 @@ wire w_valid;
 wire done;
 
 localparam test_input = 512'h68656C6C6F20776F726C648000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000058;
+reg [31:0] expected_w [0:63];
+
+initial begin
+    $readmemh("message_schedule_hex.txt", expected_w);
+end
 
 message_schedule uut(
     .in(in),
@@ -60,6 +65,7 @@ assign combined_16 = {
                         uut.w[12], uut.w[13], uut.w[14], uut.w[15]
                     };
 
+integer i;
 initial begin
     clk <= 0;
     rst_n <= 0;
@@ -77,12 +83,19 @@ initial begin
     
     // the first 16 words of w[] should match our input
     if (combined_16 === test_input) begin
-        $display("SUCCESS: w matches input");
+        $display("SUCCESS: initial w matches input");
     end else begin
-        $display("FAIL: w does not match input");
+        $display("FAIL: initial w does not match input");
     end
     
     repeat(63) @(posedge clk);
+    
+    for (i = 0; i < 64; i = i + 1) begin
+        if (uut.w[i] !== expected_w[i]) begin
+            $display("FAIL: MISMATCH wat w[%0d]: got %08X, expected %08X", i, uut.w[i], expected_w[i]);
+        end
+    end
+    $display("Compare with w done. If no FAILs, then SUCCESS");
     $finish;
 end
 

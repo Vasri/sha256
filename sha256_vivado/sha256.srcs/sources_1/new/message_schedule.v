@@ -34,7 +34,7 @@ localparam  IDLE  = 0,
             RUNNING = 1,
             DONE = 2;
 
-reg [2:0] state;
+reg [1:0] state;
 reg [31:0] w [0:63];
 wire [31:0] s0;
 wire [31:0] s1;
@@ -78,13 +78,14 @@ always @(posedge clk or negedge rst_n) begin
                     end
                     w_valid <= 1;
                     state <= RUNNING;
+                end else begin
+                    w_valid <= 0;
                 end
-                w_valid <= 0;
                 done <= 0;
             end
             
             RUNNING: begin
-                w[counter] <= w[i-16] + s0 + w[i-7] + s1;
+                w[counter] <= w[counter-16] + s0 + w[counter-7] + s1;
                 counter <= counter + 1;
                 if (counter < 63) begin
                     state <= RUNNING;
@@ -98,6 +99,7 @@ always @(posedge clk or negedge rst_n) begin
                 if (counter < 80) begin
                     state <= DONE;
                 end else begin
+                    counter <= 16;
                     state <= IDLE;
                     done <= 1;
                 end
