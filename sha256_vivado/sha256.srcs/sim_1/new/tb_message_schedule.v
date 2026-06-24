@@ -43,6 +43,7 @@ message_schedule uut(
     .clk(clk),
     .rst_n(rst_n),
     .w_out(w_out),
+    .w_valid(w_valid),
     .done(done)
     );
 
@@ -75,9 +76,11 @@ initial begin
     repeat(5) @(posedge clk);
     rst_n <= 1;
     
+    @(posedge clk);
+    
     // hello world converted to a 512-bit message block
     in <= test_input;
-    pulseStart();
+    pulseStart;
     in <= 0;
     @(posedge clk);
     
@@ -89,6 +92,8 @@ initial begin
     end
     
     repeat(63) @(posedge clk);
+    
+    @(posedge done);
     
     for (i = 0; i < 64; i = i + 1) begin
         if (uut.w[i] !== expected_w[i]) begin

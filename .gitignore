@@ -72,3 +72,13 @@ xvlog.*
 ## checkpoint files
 *.dcp
 
+final_hash.txt
+hash_values_hex.txt
+hash_values.txt
+input.txt
+message_schedule_hex.txt
+message_schedule.txt
+sha256.exe
+.vscode/launch.json
+.vscode/tasks.json
+sha256_vivado/sha256.ip_user_files/README.txt

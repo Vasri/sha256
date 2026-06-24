@@ -96,12 +96,13 @@ always @(posedge clk or negedge rst_n) begin
             
             DONE : begin
                 counter <= counter + 1;
-                if (counter < 80) begin
+                if (counter < 79) begin
                     state <= DONE;
                 end else begin
                     counter <= 16;
-                    state <= IDLE;
                     done <= 1;
+                    w_valid <= 0;
+                    state <= IDLE;
                 end
             end
         endcase
