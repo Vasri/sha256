@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 06/22/2026 03:12:18 AM
+// Create Date: 06/25/2026 03:26:21 AM
 // Design Name: 
-// Module Name: tb_compression_loop
+// Module Name: tb_sha256_toplevel
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,49 +20,41 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module tb_compression_loop;
+module tb_sha256_toplevel;
 
-reg [31:0] w;
-reg w_valid;
+localparam test_input = 512'h68656C6C6F20776F726C648000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000058;
+
+reg [511:0] in;
+reg start;
 reg clk;
 reg rst_n;
-wire [255:0] hash;
+wire [255:0] out;
 wire done;
 
-compression_loop uut (
-    .w(w),
-    .w_valid(w_valid),
+sha256_toplevel uut(
+    .in(in),
+    .start(start),
     .clk(clk),
     .rst_n(rst_n),
-    .hash(hash),
+    .hash_latched(out),
     .done(done)
 );
 
 always #5 clk <= ~clk;
 
 initial begin
-    clk <= 1;
+    in <= test_input;
+    start <= 0;
+    clk <= 0;
     rst_n <= 0;
-    w_valid <= 0;
     repeat(5) @(posedge clk);
     rst_n <= 1;
     
-    w <= 32'h68656C6C;
-    w_valid <= 1;
+    start <= 1;
     @(posedge clk);
+    start <= 0;
     
-    w <= 32'h6F20776F;
-    @(posedge clk);
-    
-    w <= 32'h726C6480;
-    @(posedge clk);
-    
-    w <= 32'h00000000;
-    @(posedge clk);
-    
-    w <= 32'h00000000;
-    @(posedge clk);
-    
+    @(posedge done);
     $finish;
 end
 
