@@ -129,7 +129,6 @@ assign temp2 = s0 + maj;
 assign hash = {h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]};
 
 always @(posedge clk or negedge rst_n) begin
-    w_valid_d <= w_valid;
     if (!rst_n) begin
         for (i = 0; i < 8; i = i + 1) begin
             working[i] <= STARTING_HASH[(7-i)*32 +: 32];
@@ -137,25 +136,31 @@ always @(posedge clk or negedge rst_n) begin
         end
         k_index <= 0;
         done <= 0;
-    end else if (w_valid) begin
-        k_index <= k_index + 1;
-        working[7] <= working[6];
-        working[6] <= working[5];
-        working[5] <= working[4];
-        working[4] <= working[3] + temp1;
-        working[3] <= working[2];
-        working[2] <= working[1];
-        working[1] <= working[0];
-        working[0] <= temp1 + temp2;
-    end
-    
-    if (w_valid_d && !w_valid) begin
-        for (i = 0; i < 8; i = i + 1) begin
-            h[i] <= h[i] + working[i];
+        w_valid_d <= 0;
+    end else begin
+        w_valid_d <= w_valid;
+        if (w_valid_d && !w_valid) begin
+            for (i = 0; i < 8; i = i + 1) begin
+                h[i] <= h[i] + working[i];
+                working[i] <= h[i] + working[i];
+            end
+            done <= 1;
+            k_index <= 0;
+        end else if (w_valid) begin
+            done <= 0;
+            k_index <= k_index + 1;
+            working[7] <= working[6];
+            working[6] <= working[5];
+            working[5] <= working[4];
+            working[4] <= working[3] + temp1;
+            working[3] <= working[2];
+            working[2] <= working[1];
+            working[1] <= working[0];
+            working[0] <= temp1 + temp2;
+        end else begin
+            done <= 0;
         end
-        done <= 1;
     end
-    
 end
 
 

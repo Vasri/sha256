@@ -23,6 +23,7 @@
 module sha256_toplevel(
     input [511:0] in,
     input start,
+    input last_block,
     input clk,
     input rst_n,
     output reg [255:0] hash_latched,
@@ -39,6 +40,7 @@ wire w_valid;
 wire [255:0] hash;
 
 reg state;
+reg is_last;
 
 message_schedule ms(
     .in(in),
@@ -64,6 +66,7 @@ always @(posedge clk or negedge rst_n) begin
         done <= 0;
         state <= IDLE;
         hash_latched <= 0;
+        is_last <= 0;
     end else begin
         case(state)
             IDLE:
@@ -71,11 +74,15 @@ always @(posedge clk or negedge rst_n) begin
                 done <= 0;
                 if (start) begin
                     state <= RUNNING;
+                    is_last <= last_block;
                 end
             end
             RUNNING:
             begin
-                if (cl_done) begin
+                if (start) begin
+                    is_last <= last_block;
+                end
+                if (cl_done && is_last) begin
                     hash_latched <= hash;
                     done <= 1;
                     state <= IDLE;
